@@ -65,6 +65,10 @@ unittest(constructors)
   assertNotNull(lcd6);
   assertNotNull(lcd7);
   assertNotNull(lcd8);
+  delete lcd8;
+  delete lcd7;
+  delete lcd6;
+  delete lcd5;
 }
 
 unittest(init)
