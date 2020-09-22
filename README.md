@@ -1,13 +1,15 @@
-= Liquid Crystal Library for Arduino =
+# Liquid Crystal Library for Arduino
 
-This library allows an Arduino board to control LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset, which is found on most text-based LCDs.
+This library allows an Arduino board to control LiquidCrystal displays (LCDs) based on the Hitachi HD44780 (or a compatible) chipset, which is found on most text-based LCDs. 
 
 For more information about this library please visit us at
 http://www.arduino.cc/en/Reference/LiquidCrystal
 
-== License ==
+This library has been augmented to to support automated testing in conjunction with [Arduino CI](https://github.com/ianfixes/arduino_ci).
 
-Copyright (C) 2006-2008 Hans-Christoph Steiner. All rights reserved.
+# License
+
+Copyright (c) 2006-2008 Hans-Christoph Steiner. All rights reserved.
 Copyright (c) 2010 Arduino LLC. All right reserved.
 
 This library is free software; you can redistribute it and/or
