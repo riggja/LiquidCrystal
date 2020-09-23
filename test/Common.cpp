@@ -125,3 +125,33 @@ unittest(begin_16_02)
     assertEqual(expected[i], pinLog[i]);
   }
 }
+
+unittest(print_hello)
+{
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.print("Hello");
+  state->digitalPin[enable].removeObserver("lcd");
+  /*      rs rw  d7 to d0
+     576 : 1  0  0100      \
+     640 : 1  0      1000  0x48 H
+     608 : 1  0  0110      \
+     592 : 1  0      0101  0x65 e
+     608 : 1  0  0110      \
+     704 : 1  0      1100  0x6C l
+     608 : 1  0  0110      \
+     704 : 1  0      1100  0x6C l
+     608 : 1  0  0110      \
+     752 : 1  0      1111  0x6F o
+   */
+  int expected[10] = {576, 640, 608, 592, 608, 704, 608, 704, 608, 752};
+  
+  assertEqual(10, logIndex);
+  for (int i = 0; i < logIndex; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
