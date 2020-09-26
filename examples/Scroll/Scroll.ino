@@ -85,6 +85,4 @@ void loop() {
 
   // delay at the end of the full loop:
   delay(1000);
-
 }
-

@@ -80,11 +80,3 @@ void loop() {
   // increment the letter:
   thisChar++;
 }
-
-
-
-
-
-
-
-
