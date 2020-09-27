@@ -1,3 +1,4 @@
+#include <List>
 #include <bitset>
 #include <iostream>
 
@@ -19,12 +20,23 @@ const byte d6 = 16;
 const byte d7 = 17;
 
 GodmodeState *state = GODMODE();
-const int logSize = 100;
-int pinLog[logSize], logIndex = 0;
 
 class BitCollector : public DataStreamObserver {
+private:
+  bool fourBitMode;
+  bool showData;
+  List<int> pinLog;
+  int logIndex = 0;
+
 public:
-  BitCollector() : DataStreamObserver(false, false) {}
+  BitCollector(bool fourBitMode = true, bool showData = false,
+               int logSize = 100)
+      : DataStreamObserver(false, false) {
+    this->fourBitMode = fourBitMode;
+    this->showData = showData;
+    pinLog = new List<int>(logSize);
+  }
+  ~BitCollector() { delete pinLog; }
   virtual void onBit(bool aBit) {
     if (aBit && logIndex < logSize) {
       int value = 0;
@@ -38,12 +50,23 @@ public:
       value = (value << 1) + state->digitalPin[d2];
       value = (value << 1) + state->digitalPin[d1];
       value = (value << 1) + state->digitalPin[d0];
-      pinLog[logIndex++] = value;
-      // std::bitset<16> bits(value);
-      // std::cout << value << " : " << bits << std::endl;
+      pinLog[logIndex] = value;
+      if (showData) {
+        std::cout << value << " : " << ((value >> 9) & 1) << "  "
+                  << ((value >> 8) & 1) << "  ";
+        if (fourBitMode) {
+          std::bitset<4> bits((value >> 4) & 0x0F);
+          std::cout << bits;
+        } else {
+          std::bitset<8> bits(value & 0xFF);
+          std::cout << bits;
+        }
+        std::cout << std::endl;
+      }
+      ++logIndex;
     }
   }
-
+  bool assertDataEqual(List<int> expected);
   virtual String observerName() const { return "BitCollector"; }
 };
 
