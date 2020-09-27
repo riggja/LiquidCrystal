@@ -22,11 +22,14 @@ GodmodeState *state = GODMODE();
 const int logSize = 100;
 int pinLog[logSize], logIndex = 0;
 
-class BitCollector : public DataStreamObserver {
+class BitCollector : public DataStreamObserver
+{
 public:
   BitCollector() : DataStreamObserver(false, false) {}
-  virtual void onBit(bool aBit) {
-    if (aBit && logIndex < logSize) {
+  virtual void onBit(bool aBit)
+  {
+    if (aBit && logIndex < logSize)
+    {
       int value = 0;
       value = (value << 1) + state->digitalPin[rs];
       value = (value << 1) + state->digitalPin[rw];
@@ -47,12 +50,14 @@ public:
   virtual String observerName() const { return "BitCollector"; }
 };
 
-unittest(className) {
+unittest(className)
+{
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
   std::cout << "TESTING: " << lcd.className() << std::endl;
 }
 
-unittest(constructors) {
+unittest(constructors)
+{
   LiquidCrystal_Test lcd1(rs, enable, d4, d5, d6, d7);
   LiquidCrystal_Test lcd2(rs, rw, enable, d4, d5, d6, d7);
   LiquidCrystal_Test lcd3(rs, enable, d0, d1, d2, d3, d4, d5, d6, d7);
@@ -74,7 +79,8 @@ unittest(constructors) {
   delete lcd5;
 }
 
-unittest(init) {
+unittest(init)
+{
   state->reset();
   BitCollector enableBits;
   logIndex = 0;
@@ -97,12 +103,14 @@ unittest(init) {
    */
   int expected[12] = {48, 48, 48, 32, 32, 0, 0, 192, 0, 16, 0, 96};
   assertEqual(12, logIndex);
-  for (int i = 0; i < logIndex; ++i) {
+  for (int i = 0; i < logIndex; ++i)
+  {
     assertEqual(expected[i], pinLog[i]);
   }
 }
 
-unittest(begin_16_02) {
+unittest(begin_16_02)
+{
   state->reset();
   BitCollector enableBits;
   logIndex = 0;
@@ -126,7 +134,57 @@ unittest(begin_16_02) {
    */
   int expected[12] = {48, 48, 48, 32, 32, 128, 0, 192, 0, 16, 0, 96};
   assertEqual(12, logIndex);
-  for (int i = 0; i < logIndex; ++i) {
+  for (int i = 0; i < logIndex; ++i)
+  {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
+
+unittest(createChar)
+{
+  byte smiley[8] = {
+      B00000,
+      B10001,
+      B00000,
+      B00000,
+      B10001,
+      B01110,
+      B00000,
+  };
+
+  // Test the function
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.createChar(0, smiley);
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+     64 : 0  0  0100
+      0 : 0  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+    528 : 1  0  0001
+    528 : 1  0      0001
+    512 : 1  0  0000
+    512 : 1  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+    528 : 1  0  0001
+    528 : 1  0      0001
+    512 : 1  0  0000
+    736 : 1  0      1110
+    512 : 1  0  0000
+    512 : 1  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+*/
+  const int expectedSize = 18;
+  int expected[expectedSize] = {64, 0, 512, 512, 528, 528, 512, 512, 512, 512, 528, 528, 512, 736, 512, 512, 512, 512};
+  assertEqual(expectedSize, logIndex);
+  for (int i = 0; i < expectedSize; ++i)
+  {
     assertEqual(expected[i], pinLog[i]);
   }
 }
