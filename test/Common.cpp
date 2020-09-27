@@ -154,6 +154,97 @@ unittest(begin_16_02) {
   }
 }
 
+unittest(createChar) {
+  byte smiley[8] = {
+      B00000, B10001, B00000, B00000, B10001, B01110, B00000,
+  };
+
+  // Test the function
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.createChar(0, smiley);
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+     64 : 0  0  0100
+      0 : 0  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+    528 : 1  0  0001
+    528 : 1  0      0001
+    512 : 1  0  0000
+    512 : 1  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+    528 : 1  0  0001
+    528 : 1  0      0001
+    512 : 1  0  0000
+    736 : 1  0      1110
+    512 : 1  0  0000
+    512 : 1  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+*/
+  const int expectedSize = 18;
+  int expected[expectedSize] = {64,  0,   512, 512, 528, 528, 512, 512, 512,
+                                512, 528, 528, 512, 736, 512, 512, 512, 512};
+  assertEqual(expectedSize, logIndex);
+  for (int i = 0; i < expectedSize; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
+
+unittest(clear) {
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.clear();
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+      0 : 0  0  0000          \
+     16 : 0  0      0001       clear
+   */
+  int expected[2] = {0, 16};
+  assertEqual(2, logIndex);
+  for (int i = 0; i < logIndex; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
+
+unittest(print_hello) {
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.print("Hello");
+  state->digitalPin[enable].removeObserver("lcd");
+  /*      rs rw  d7 to d0
+     576 : 1  0  0100      \
+     640 : 1  0      1000  0x48 H
+     608 : 1  0  0110      \
+     592 : 1  0      0101  0x65 e
+     608 : 1  0  0110      \
+     704 : 1  0      1100  0x6C l
+     608 : 1  0  0110      \
+     704 : 1  0      1100  0x6C l
+     608 : 1  0  0110      \
+     752 : 1  0      1111  0x6F o
+   */
+  int expected[10] = {576, 640, 608, 592, 608, 704, 608, 704, 608, 752};
+
+  assertEqual(10, logIndex);
+  for (int i = 0; i < logIndex; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
+
 unittest(scrollDisplayLeft) {
   state->reset();
   BitCollector enableBits;

@@ -2,3 +2,5 @@ Gemfile.lock
 .bundle/*
 vendor/*
 *.cpp.bin*
+update.sh
+push.sh
