@@ -130,3 +130,45 @@ unittest(begin_16_02) {
     assertEqual(expected[i], pinLog[i]);
   }
 }
+
+unittest(scrollDisplayLeft) {
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.scrollDisplayLeft();
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+     16 : 0  0  0001      \
+    128 : 0  0      1000   00011000 = shift display left
+   */
+  const int expectedSize = 2;
+  int expected[expectedSize] = {16, 128};
+  assertEqual(expectedSize, logIndex);
+  for (int i = 0; i < expectedSize; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
+
+unittest(scrollDisplayRight) {
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.scrollDisplayRight();
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+     16 : 0  0  0001      first half of command
+    192 : 0  0      1100  full command: 00011100 = shift display right
+   */
+  const int expectedSize = 2;
+  int expected[expectedSize] = {16, 192};
+  assertEqual(expectedSize, logIndex);
+  for (int i = 0; i < expectedSize; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
