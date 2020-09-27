@@ -162,8 +162,8 @@ unittest(scrollDisplayRight) {
   lcd.scrollDisplayRight();
   state->digitalPin[enable].removeObserver("lcd");
   /*     rs rw  d7 to d0
-     16 : 0  0  0001      \
-    192 : 0  0      1100   00011100 = shift display right
+     16 : 0  0  0001      first half of command
+    192 : 0  0      1100  full command: 00011100 = shift display right
    */
   const int expectedSize = 2;
   int expected[expectedSize] = {16, 192};
