@@ -131,6 +131,48 @@ unittest(begin_16_02) {
   }
 }
 
+unittest(createChar) {
+  byte smiley[8] = {
+      B00000, B10001, B00000, B00000, B10001, B01110, B00000,
+  };
+
+  // Test the function
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.createChar(0, smiley);
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+     64 : 0  0  0100
+      0 : 0  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+    528 : 1  0  0001
+    528 : 1  0      0001
+    512 : 1  0  0000
+    512 : 1  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+    528 : 1  0  0001
+    528 : 1  0      0001
+    512 : 1  0  0000
+    736 : 1  0      1110
+    512 : 1  0  0000
+    512 : 1  0      0000
+    512 : 1  0  0000
+    512 : 1  0      0000
+*/
+  const int expectedSize = 18;
+  int expected[expectedSize] = {64,  0,   512, 512, 528, 528, 512, 512, 512,
+                                512, 528, 528, 512, 736, 512, 512, 512, 512};
+  assertEqual(expectedSize, logIndex);
+  for (int i = 0; i < expectedSize; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
+
 unittest(scrollDisplayLeft) {
   state->reset();
   BitCollector enableBits;
