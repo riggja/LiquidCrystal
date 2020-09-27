@@ -173,6 +173,26 @@ unittest(createChar) {
   }
 }
 
+unittest(clear) {
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.clear();
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+      0 : 0  0  0000          \
+     16 : 0  0      0001       clear
+   */
+  int expected[2] = {0, 16};
+  assertEqual(2, logIndex);
+  for (int i = 0; i < logIndex; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
+
 unittest(scrollDisplayLeft) {
   state->reset();
   BitCollector enableBits;
