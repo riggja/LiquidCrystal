@@ -62,4 +62,3 @@ void loop() {
   lcd.cursor();
   delay(500);
 }
-
