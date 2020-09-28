@@ -17,36 +17,40 @@ const byte d5 = 15;
 const byte d6 = 16;
 const byte d7 = 17;
 
-GodmodeState* state = GODMODE();
+GodmodeState *state = GODMODE();
 const int logSize = 100;
 int pinLog[logSize], logIndex = 0;
 
-class BitCollector : public DataStreamObserver {
-  public:
-    BitCollector() : DataStreamObserver(false, false) {}
-    virtual void onBit(bool aBit) {
-      if (aBit && logIndex < logSize) {
-        int value = 0;
-        value = (value << 1) + state->digitalPin[rs];
-        value = (value << 1) + state->digitalPin[rw];
-        value = (value << 1) + state->digitalPin[d7];
-        value = (value << 1) + state->digitalPin[d6];
-        value = (value << 1) + state->digitalPin[d5];
-        value = (value << 1) + state->digitalPin[d4];
-        value = (value << 1) + state->digitalPin[d3];
-        value = (value << 1) + state->digitalPin[d2];
-        value = (value << 1) + state->digitalPin[d1];
-        value = (value << 1) + state->digitalPin[d0];
-        pinLog[logIndex++] = value;
-        // std::bitset<16> bits(value);
-        // std::cout << value << " : " << bits << std::endl;
-      }
+class BitCollector : public DataStreamObserver
+{
+public:
+  BitCollector() : DataStreamObserver(false, false) {}
+  virtual void onBit(bool aBit)
+  {
+    if (aBit && logIndex < logSize)
+    {
+      int value = 0;
+      value = (value << 1) + state->digitalPin[rs];
+      value = (value << 1) + state->digitalPin[rw];
+      value = (value << 1) + state->digitalPin[d7];
+      value = (value << 1) + state->digitalPin[d6];
+      value = (value << 1) + state->digitalPin[d5];
+      value = (value << 1) + state->digitalPin[d4];
+      value = (value << 1) + state->digitalPin[d3];
+      value = (value << 1) + state->digitalPin[d2];
+      value = (value << 1) + state->digitalPin[d1];
+      value = (value << 1) + state->digitalPin[d0];
+      pinLog[logIndex++] = value;
+      // std::bitset<16> bits(value);
+      // std::cout << value << " : " << bits << std::endl;
     }
+  }
 
-    virtual String observerName() const { return "BitCollector"; }
+  virtual String observerName() const { return "BitCollector"; }
 };
 
-unittest(className) {
+unittest(className)
+{
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
   std::cout << "TESTING: " << lcd.className() << std::endl;
 }
@@ -57,10 +61,10 @@ unittest(constructors)
   LiquidCrystal_Test lcd2(rs, rw, enable, d4, d5, d6, d7);
   LiquidCrystal_Test lcd3(rs, enable, d0, d1, d2, d3, d4, d5, d6, d7);
   LiquidCrystal_Test lcd4(rs, rw, enable, d0, d1, d2, d3, d4, d5, d6, d7);
-  LiquidCrystal_Test* lcd5 = new LiquidCrystal_Test(rs, enable, d4, d5, d6, d7);
-  LiquidCrystal_Test* lcd6 = new LiquidCrystal_Test(rs, rw, enable, d4, d5, d6, d7);
-  LiquidCrystal_Test* lcd7 = new LiquidCrystal_Test(rs, enable, d0, d1, d2, d3, d4, d5, d6, d7);
-  LiquidCrystal_Test* lcd8 = new LiquidCrystal_Test(rs, rw, enable, d0, d1, d2, d3, d4, d5, d6, d7);
+  LiquidCrystal_Test *lcd5 = new LiquidCrystal_Test(rs, enable, d4, d5, d6, d7);
+  LiquidCrystal_Test *lcd6 = new LiquidCrystal_Test(rs, rw, enable, d4, d5, d6, d7);
+  LiquidCrystal_Test *lcd7 = new LiquidCrystal_Test(rs, enable, d0, d1, d2, d3, d4, d5, d6, d7);
+  LiquidCrystal_Test *lcd8 = new LiquidCrystal_Test(rs, rw, enable, d0, d1, d2, d3, d4, d5, d6, d7);
   assertNotNull(lcd5);
   assertNotNull(lcd6);
   assertNotNull(lcd7);
@@ -91,7 +95,8 @@ unittest(init)
    */
   int expected[12] = {48, 48, 48, 32, 32, 0, 0, 192, 0, 16, 0, 96};
   assertEqual(12, logIndex);
-  for (int i = 0; i < logIndex; ++i) {
+  for (int i = 0; i < logIndex; ++i)
+  {
     assertEqual(expected[i], pinLog[i]);
   }
 }
@@ -121,13 +126,14 @@ unittest(begin_16_02)
    */
   int expected[12] = {48, 48, 48, 32, 32, 128, 0, 192, 0, 16, 0, 96};
   assertEqual(12, logIndex);
-  for (int i = 0; i < logIndex; ++i) {
+  for (int i = 0; i < logIndex; ++i)
+  {
     assertEqual(expected[i], pinLog[i]);
   }
 }
 
-
-unittest(display){
+unittest(display)
+{
   state->reset();
   BitCollector enableBits;
   logIndex = 0;
@@ -143,13 +149,14 @@ unittest(display){
   const int expectedLength = 2;
   int expected[expectedLength] = {0, 192};
   assertEqual(expectedLength, logIndex);
-  for (int i = 0; i < expectedLength; ++i) {
+  for (int i = 0; i < expectedLength; ++i)
+  {
     assertEqual(expected[i], pinLog[i]);
   }
 }
 
-
-unittest(noDisplay){
+unittest(noDisplay)
+{
   state->reset();
   BitCollector enableBits;
   logIndex = 0;
@@ -165,7 +172,8 @@ unittest(noDisplay){
   const int expectedLength = 2;
   int expected[expectedLength] = {0, 128};
   assertEqual(expectedLength, logIndex);
-  for (int i = 0; i < expectedLength; ++i) {
+  for (int i = 0; i < expectedLength; ++i)
+  {
     assertEqual(expected[i], pinLog[i]);
   }
 }
