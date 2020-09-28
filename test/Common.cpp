@@ -285,3 +285,29 @@ unittest(failIfWrongValues) {
   lcd.clear();
   assertFalse(pinValues.isEqualTo(expected));
 }
+
+/*     rs rw  d7 to d0
+    0 : 0  0  0000
+   96 : 0  0      0110  => left to right
+*/
+unittest(leftToRight) {
+  vector<int> expected{0, 96};
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  BitCollector pinValues(false); // test the next line
+  lcd.leftToRight();
+  assertTrue(pinValues.isEqualTo(expected));
+}
+
+/*     rs rw  d7 to d0
+    0 : 0  0  0000
+   64 : 0  0      0100  => right to left
+*/
+unittest(rightToLeft) {
+  vector<int> expected{0, 64};
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  BitCollector pinValues(false); // test the next line
+  lcd.rightToLeft();
+  assertTrue(pinValues.isEqualTo(expected));
+}
