@@ -1,6 +1,6 @@
-#include <List>
 #include <bitset>
 #include <iostream>
+#include <vector>
 
 #include "Arduino.h"
 #include "ArduinoUnitTests.h"
@@ -25,20 +25,17 @@ class BitCollector : public DataStreamObserver {
 private:
   bool fourBitMode;
   bool showData;
-  List<int> pinLog;
-  int logIndex = 0;
+  vector<int> pinLog;
 
 public:
-  BitCollector(bool fourBitMode = true, bool showData = false,
-               int logSize = 100)
+  BitCollector(bool showData = false, bool fourBitMode = true)
       : DataStreamObserver(false, false) {
     this->fourBitMode = fourBitMode;
     this->showData = showData;
-    pinLog = new List<int>(logSize);
   }
-  ~BitCollector() { delete pinLog; }
+
   virtual void onBit(bool aBit) {
-    if (aBit && logIndex < logSize) {
+    if (aBit) {
       int value = 0;
       value = (value << 1) + state->digitalPin[rs];
       value = (value << 1) + state->digitalPin[rw];
@@ -50,12 +47,16 @@ public:
       value = (value << 1) + state->digitalPin[d2];
       value = (value << 1) + state->digitalPin[d1];
       value = (value << 1) + state->digitalPin[d0];
-      pinLog[logIndex] = value;
+      pinLog.push_back(value);
       if (showData) {
-        std::cout << value << " : " << ((value >> 9) & 1) << "  "
+        std::cout.width(7);
+        std::cout << std::right << value << " : " << ((value >> 9) & 1) << "  "
                   << ((value >> 8) & 1) << "  ";
         if (fourBitMode) {
           std::bitset<4> bits((value >> 4) & 0x0F);
+          if ((pinLog.size() - 1) % 2) {
+            std::cout << "    ";
+          }
           std::cout << bits;
         } else {
           std::bitset<8> bits(value & 0xFF);
@@ -63,17 +64,23 @@ public:
         }
         std::cout << std::endl;
       }
-      ++logIndex;
     }
   }
-  bool assertDataEqual(List<int> expected);
+
+  bool isEqualTo(const vector<int> &expected) {
+    if (pinLog.size() != expected.size()) {
+      return false;
+    }
+    for (int i = 0; i < pinLog.size(); ++i) {
+      if (pinLog.at(i) != expected.at(i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   virtual String observerName() const { return "BitCollector"; }
 };
-
-unittest(className) {
-  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
-  std::cout << "TESTING: " << lcd.className() << std::endl;
-}
 
 unittest(constructors) {
   LiquidCrystal_Test lcd1(rs, enable, d4, d5, d6, d7);
@@ -99,9 +106,8 @@ unittest(constructors) {
 
 unittest(init) {
   state->reset();
-  BitCollector enableBits;
-  logIndex = 0;
-  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  BitCollector pinValues(false);
+  state->digitalPin[enable].addObserver("lcd", &pinValues);
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
   state->digitalPin[enable].removeObserver("lcd");
   /*     rs rw  d7 to d0
@@ -118,19 +124,15 @@ unittest(init) {
       0 : 0  0  0000          \
      96 : 0  0      0110       increment cursor position, no display shift
    */
-  int expected[12] = {48, 48, 48, 32, 32, 0, 0, 192, 0, 16, 0, 96};
-  assertEqual(12, logIndex);
-  for (int i = 0; i < logIndex; ++i) {
-    assertEqual(expected[i], pinLog[i]);
-  }
+  vector<int> expected{48, 48, 48, 32, 32, 0, 0, 192, 0, 16, 0, 96};
+  assertTrue(pinValues.isEqualTo(expected));
 }
 
 unittest(begin_16_02) {
   state->reset();
-  BitCollector enableBits;
-  logIndex = 0;
+  BitCollector pinValues(false);
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
-  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  state->digitalPin[enable].addObserver("lcd", &pinValues);
   lcd.begin(16, 2);
   state->digitalPin[enable].removeObserver("lcd");
   /*     rs rw  d7 to d0
@@ -147,11 +149,8 @@ unittest(begin_16_02) {
       0 : 0  0  0000          \
      96 : 0  0      0110       increment cursor position, no display shift
    */
-  int expected[12] = {48, 48, 48, 32, 32, 128, 0, 192, 0, 16, 0, 96};
-  assertEqual(12, logIndex);
-  for (int i = 0; i < logIndex; ++i) {
-    assertEqual(expected[i], pinLog[i]);
-  }
+  vector<int> expected{48, 48, 48, 32, 32, 128, 0, 192, 0, 16, 0, 96};
+  assertTrue(pinValues.isEqualTo(expected));
 }
 
 unittest(createChar) {
@@ -161,10 +160,9 @@ unittest(createChar) {
 
   // Test the function
   state->reset();
-  BitCollector enableBits;
-  logIndex = 0;
+  BitCollector pinValues(false);
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
-  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  state->digitalPin[enable].addObserver("lcd", &pinValues);
   lcd.createChar(0, smiley);
   state->digitalPin[enable].removeObserver("lcd");
   /*     rs rw  d7 to d0
@@ -187,42 +185,33 @@ unittest(createChar) {
     512 : 1  0  0000
     512 : 1  0      0000
 */
-  const int expectedSize = 18;
-  int expected[expectedSize] = {64,  0,   512, 512, 528, 528, 512, 512, 512,
-                                512, 528, 528, 512, 736, 512, 512, 512, 512};
-  assertEqual(expectedSize, logIndex);
-  for (int i = 0; i < expectedSize; ++i) {
-    assertEqual(expected[i], pinLog[i]);
-  }
+  vector<int> expected{64,  0,   512, 512, 528, 528, 512, 512, 512,
+                       512, 528, 528, 512, 736, 512, 512, 512, 512};
+  assertTrue(pinValues.isEqualTo(expected));
 }
 
 unittest(clear) {
   state->reset();
-  BitCollector enableBits;
-  logIndex = 0;
+  BitCollector pinValues(false);
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
   lcd.begin(16, 2);
-  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  state->digitalPin[enable].addObserver("lcd", &pinValues);
   lcd.clear();
   state->digitalPin[enable].removeObserver("lcd");
   /*     rs rw  d7 to d0
       0 : 0  0  0000          \
      16 : 0  0      0001       clear
    */
-  int expected[2] = {0, 16};
-  assertEqual(2, logIndex);
-  for (int i = 0; i < logIndex; ++i) {
-    assertEqual(expected[i], pinLog[i]);
-  }
+  vector<int> expected{0, 16};
+  assertTrue(pinValues.isEqualTo(expected));
 }
 
 unittest(print_hello) {
   state->reset();
-  BitCollector enableBits;
-  logIndex = 0;
+  BitCollector pinValues(false);
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
   lcd.begin(16, 2);
-  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  state->digitalPin[enable].addObserver("lcd", &pinValues);
   lcd.print("Hello");
   state->digitalPin[enable].removeObserver("lcd");
   /*      rs rw  d7 to d0
@@ -237,52 +226,38 @@ unittest(print_hello) {
      608 : 1  0  0110      \
      752 : 1  0      1111  0x6F o
    */
-  int expected[10] = {576, 640, 608, 592, 608, 704, 608, 704, 608, 752};
-
-  assertEqual(10, logIndex);
-  for (int i = 0; i < logIndex; ++i) {
-    assertEqual(expected[i], pinLog[i]);
-  }
+  vector<int> expected{576, 640, 608, 592, 608, 704, 608, 704, 608, 752};
+  assertTrue(pinValues.isEqualTo(expected));
 }
 
 unittest(scrollDisplayLeft) {
   state->reset();
-  BitCollector enableBits;
-  logIndex = 0;
+  BitCollector pinValues(false);
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
   lcd.begin(16, 2);
-  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  state->digitalPin[enable].addObserver("lcd", &pinValues);
   lcd.scrollDisplayLeft();
   state->digitalPin[enable].removeObserver("lcd");
   /*     rs rw  d7 to d0
      16 : 0  0  0001      \
     128 : 0  0      1000   00011000 = shift display left
    */
-  const int expectedSize = 2;
-  int expected[expectedSize] = {16, 128};
-  assertEqual(expectedSize, logIndex);
-  for (int i = 0; i < expectedSize; ++i) {
-    assertEqual(expected[i], pinLog[i]);
-  }
+  vector<int> expected{16, 128};
+  assertTrue(pinValues.isEqualTo(expected));
 }
 
 unittest(scrollDisplayRight) {
   state->reset();
-  BitCollector enableBits;
-  logIndex = 0;
+  BitCollector pinValues(false);
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
   lcd.begin(16, 2);
-  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  state->digitalPin[enable].addObserver("lcd", &pinValues);
   lcd.scrollDisplayRight();
   state->digitalPin[enable].removeObserver("lcd");
   /*     rs rw  d7 to d0
      16 : 0  0  0001      first half of command
     192 : 0  0      1100  full command: 00011100 = shift display right
    */
-  const int expectedSize = 2;
-  int expected[expectedSize] = {16, 192};
-  assertEqual(expectedSize, logIndex);
-  for (int i = 0; i < expectedSize; ++i) {
-    assertEqual(expected[i], pinLog[i]);
-  }
+  vector<int> expected{16, 192};
+  assertTrue(pinValues.isEqualTo(expected));
 }
