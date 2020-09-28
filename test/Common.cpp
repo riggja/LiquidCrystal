@@ -125,3 +125,47 @@ unittest(begin_16_02)
     assertEqual(expected[i], pinLog[i]);
   }
 }
+
+
+unittest(display){
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.display();
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+      0 : 0  0  0000      \
+    192 : 0  0      1100    00001100 = turns on LCD display
+  */
+  const int expectedLength = 2;
+  int expected[expectedLength] = {0, 192};
+  assertEqual(expectedLength, logIndex);
+  for (int i = 0; i < expectedLength; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
+
+
+unittest(noDisplay){
+  state->reset();
+  BitCollector enableBits;
+  logIndex = 0;
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  state->digitalPin[enable].addObserver("lcd", &enableBits);
+  lcd.noDisplay();
+  state->digitalPin[enable].removeObserver("lcd");
+  /*     rs rw  d7 to d0
+    0 :  0   0  0000      \
+  128 :  0   0      1000    00001000 = turns off LCD display
+  */
+  const int expectedLength = 2;
+  int expected[expectedLength] = {0, 128};
+  assertEqual(expectedLength, logIndex);
+  for (int i = 0; i < expectedLength; ++i) {
+    assertEqual(expected[i], pinLog[i]);
+  }
+}
