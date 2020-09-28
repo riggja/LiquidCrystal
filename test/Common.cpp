@@ -179,6 +179,32 @@ unittest(noBlink) {
 }
 
 /*     rs rw  d7 to d0
+      0 : 0  0  0000
+    224 : 0  0      1110  00001110 = display on, cursor on
+*/
+unittest(cursor) {
+  vector<int> expected{0, 224};
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  BitCollector pinValues(false); // test the next line
+  lcd.cursor();
+  assertTrue(pinValues.isEqualTo(expected));
+}
+
+/*     rs rw  d7 to d0
+      0 : 0  0  0000
+    192 : 0  0      1100  00001100 = display on, cursor off
+*/
+unittest(noCursor) {
+  vector<int> expected{0, 192};
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  BitCollector pinValues(false); // test the next line
+  lcd.noCursor();
+  assertTrue(pinValues.isEqualTo(expected));
+}
+
+/*     rs rw  d7 to d0
    64 : 0  0  0100
     0 : 0  0      0000
   512 : 1  0  0000
