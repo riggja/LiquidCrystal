@@ -1,6 +1,6 @@
 #pragma once
 #include <LiquidCrystal.h>
-#ifdef MOCK_PINS_COUNT
+#ifdef ARDUINO_CI
 
 // https://github.com/Arduino-CI/arduino_ci/issues/165
 #undef max
