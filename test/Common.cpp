@@ -350,3 +350,29 @@ unittest(rightToLeft) {
   lcd.rightToLeft();
   assertTrue(pinValues.isEqualTo(expected));
 }
+
+/*       rs rw  d7 to d0
+      0 : 0  0  0000      \
+    192 : 0  0      1100   00001100 = turns on LCD display
+*/
+unittest(display) {
+  vector<int> expected{0, 192};
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  BitCollector pinValues(false); // test the next line
+  lcd.display();
+  assertTrue(pinValues.isEqualTo(expected));
+}
+
+/*      rs rw  d7 to d0
+    0 :  0  0  0000      \
+  128 :  0  0      1000    00001000 = turns off LCD display
+*/
+unittest(noDisplay) {
+  vector<int> expected{0, 128};
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+  lcd.begin(16, 2);
+  BitCollector pinValues(false); // test the next line
+  lcd.noDisplay();
+  assertTrue(pinValues.isEqualTo(expected));
+}
