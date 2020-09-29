@@ -3,7 +3,22 @@
 #ifdef ARDUINO_CI
 
 // https://github.com/Arduino-CI/arduino_ci/issues/165
+#ifdef max
 #undef max
+#ifdef __cplusplus
+template <class T, class L>
+auto max(const T &a, const L &b) -> decltype((b < a) ? b : a) {
+  return (a < b) ? b : a;
+}
+#else
+#define max(a, b)                                                              \
+  ({                                                                           \
+    __typeof__(a) _a = (a);                                                    \
+    __typeof__(b) _b = (b);                                                    \
+    _a > _b ? _a : _b;                                                         \
+  })
+#endif
+#endif
 
 #include <string>
 #include <vector>
