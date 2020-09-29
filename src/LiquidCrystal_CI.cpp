@@ -1,42 +1,40 @@
 #include "LiquidCrystal_CI.h"
 #ifdef MOCK_PINS_COUNT
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-#include <inttypes.h>
 
 LiquidCrystal_CI::LiquidCrystal_CI(uint8_t rs, uint8_t rw, uint8_t enable,
-			     uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3,
-			     uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
-           : LiquidCrystal_Base(rs, rw, enable, d0, d1, d2, d3, d4, d5, d6, d7)
-{
+                                   uint8_t d0, uint8_t d1, uint8_t d2,
+                                   uint8_t d3, uint8_t d4, uint8_t d5,
+                                   uint8_t d6, uint8_t d7)
+    : LiquidCrystal_Base(rs, rw, enable, d0, d1, d2, d3, d4, d5, d6, d7) {
   init(rs);
 }
 
-LiquidCrystal_CI::LiquidCrystal_CI(uint8_t rs, uint8_t enable,
-			     uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3,
-			     uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
-           : LiquidCrystal_Base(rs, enable, d0, d1, d2, d3, d4, d5, d6, d7)
-{
+LiquidCrystal_CI::LiquidCrystal_CI(uint8_t rs, uint8_t enable, uint8_t d0,
+                                   uint8_t d1, uint8_t d2, uint8_t d3,
+                                   uint8_t d4, uint8_t d5, uint8_t d6,
+                                   uint8_t d7)
+    : LiquidCrystal_Base(rs, enable, d0, d1, d2, d3, d4, d5, d6, d7) {
   init(rs);
 }
 
 LiquidCrystal_CI::LiquidCrystal_CI(uint8_t rs, uint8_t rw, uint8_t enable,
-			     uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3)
-           : LiquidCrystal_Base(rs, rw, enable, d0, d1, d2, d3)
-{
+                                   uint8_t d0, uint8_t d1, uint8_t d2,
+                                   uint8_t d3)
+    : LiquidCrystal_Base(rs, rw, enable, d0, d1, d2, d3) {
   init(rs);
 }
 
-LiquidCrystal_CI::LiquidCrystal_CI(uint8_t rs,  uint8_t enable,
-			     uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3)
-           : LiquidCrystal_Base(rs, enable, d0, d1, d2, d3)
-{
+LiquidCrystal_CI::LiquidCrystal_CI(uint8_t rs, uint8_t enable, uint8_t d0,
+                                   uint8_t d1, uint8_t d2, uint8_t d3)
+    : LiquidCrystal_Base(rs, enable, d0, d1, d2, d3) {
   init(rs);
 }
 
-void LiquidCrystal_CI::init(uint8_t rs)
-{
+void LiquidCrystal_CI::init(uint8_t rs) {
   _rs_pin = rs;
   _col = 0;
   _cols = 16;
@@ -61,20 +59,17 @@ void LiquidCrystal_CI::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 }
 
 /********** high level commands, for the user! */
-void LiquidCrystal_CI::clear()
-{
+void LiquidCrystal_CI::clear() {
   LiquidCrystal_Base::clear();
   clearBuffer();
 }
 
-void LiquidCrystal_CI::home()
-{
+void LiquidCrystal_CI::home() {
   LiquidCrystal_Base::home();
   _col = _row = 0;
 }
 
-void LiquidCrystal_CI::setCursor(uint8_t col, uint8_t row)
-{
+void LiquidCrystal_CI::setCursor(uint8_t col, uint8_t row) {
   LiquidCrystal_Base::setCursor(col, row);
   _col = col;
   _row = row;
@@ -119,24 +114,16 @@ void LiquidCrystal_CI::scrollDisplayRight() {
 }
 
 // This is for text that flows Left to Right
-void LiquidCrystal_CI::leftToRight() {
-  LiquidCrystal_Base::leftToRight();
-}
+void LiquidCrystal_CI::leftToRight() { LiquidCrystal_Base::leftToRight(); }
 
 // This is for text that flows Right to Left
-void LiquidCrystal_CI::rightToLeft() {
-  LiquidCrystal_Base::rightToLeft();
-}
+void LiquidCrystal_CI::rightToLeft() { LiquidCrystal_Base::rightToLeft(); }
 
 // This will 'right justify' text from the cursor
-void LiquidCrystal_CI::autoscroll() {
-  LiquidCrystal_Base::autoscroll();
-}
+void LiquidCrystal_CI::autoscroll() { LiquidCrystal_Base::autoscroll(); }
 
 // This will 'left justify' text from the cursor
-void LiquidCrystal_CI::noAutoscroll() {
-  LiquidCrystal_Base::noAutoscroll();
-}
+void LiquidCrystal_CI::noAutoscroll() { LiquidCrystal_Base::noAutoscroll(); }
 
 // Allows us to fill the first 8 CGRAM locations
 // with custom characters
@@ -151,7 +138,7 @@ size_t LiquidCrystal_CI::write(const char *buffer, size_t size) {
 
 // private data and functions to support testing
 
-LiquidCrystal_CI* LiquidCrystal_CI::_instances[MOCK_PINS_COUNT];
+LiquidCrystal_CI *LiquidCrystal_CI::_instances[MOCK_PINS_COUNT];
 
 void LiquidCrystal_CI::clearBuffer() {
   for (int row = 0; row < MAX_ROWS; ++row) {

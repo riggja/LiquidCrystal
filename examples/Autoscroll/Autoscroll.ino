@@ -75,4 +75,3 @@ void loop() {
   // clear screen for the next loop:
   lcd.clear();
 }
-
