@@ -2,12 +2,11 @@
 #include <LiquidCrystal.h>
 #ifdef MOCK_PINS_COUNT
 
-#ifndef MAX_COLS
-#define MAX_COLS 80
-#endif
-#ifndef MAX_ROWS
-#define MAX_ROWS 8
-#endif
+// https://github.com/Arduino-CI/arduino_ci/issues/165
+#undef max
+
+#include <string>
+#include <vector>
 
 class LiquidCrystal_CI : public LiquidCrystal_Base {
 public:
@@ -46,6 +45,7 @@ public:
   static LiquidCrystal_CI *forRsPin(uint8_t rs) {
     return (LiquidCrystal_CI *)LiquidCrystal_CI::_instances[rs];
   }
+  std::vector<std::string> getLines() { return _lines; }
   int getRows() { return _rows; }
   bool isBlink() { return _blink; }
   bool isCursor() { return _cursor; }
@@ -55,10 +55,8 @@ private:
   static LiquidCrystal_CI *_instances[MOCK_PINS_COUNT];
   int _col, _cols, _row, _rows, _rs_pin;
   bool _display, _cursor, _blink;
-  unsigned char _buffer[MAX_ROWS]
-                       [MAX_COLS + 1]; // space for null character at end
+  std::vector<std::string> _lines;
   void init(uint8_t rs);
-  void clearBuffer();
 };
 
 #endif
