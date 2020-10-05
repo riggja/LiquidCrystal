@@ -376,8 +376,6 @@ unittest(noDisplay) {
   lcd.noDisplay();
   assertTrue(pinValues.isEqualTo(expected));
 }
-<<<<<<< HEAD
-=======
 
 /*     rs rw  d7 to d0
     0 : 0  0  0000
@@ -519,4 +517,3 @@ unittest(setCursor) {
   lcd.setCursor(15, 1);
   assertTrue(pinValues.isEqualTo(expected));
 }
->>>>>>> master
