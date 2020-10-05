@@ -52,6 +52,26 @@ unittest(clearBuffer) {
   assertEqual(0, lines.at(1).length());
 }
 
+unittest(blink_noBlink) {
+  // create lcd object
+  LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
+
+  bool blinking = lcd.isBlink();
+
+  // check default - noBlink
+  assertEqual(0, blinking);
+
+  // check blink function
+  lcd.blink();
+  blinking = lcd.isBlink();
+  assertEqual(1, blinking);
+
+  // check noBlink function
+  lcd.noBlink();
+  blinking = lcd.isBlink();
+  assertEqual(0, blinking);
+}
+
 unittest(setCursorHighLevel) {
   // create lcd object
   LiquidCrystal_Test lcd(rs, enable, d4, d5, d6, d7);
